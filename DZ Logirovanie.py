@@ -1,8 +1,8 @@
 import requests as rq
 import logging
-import pprint
 
-logger = logging.getLogger('RequestsLogger')
+
+#logger = logging.getLogger('RequestsLogger')
 
 logging.basicConfig(level=logging.INFO, filename="success_responses.log", filemode="w", encoding="utf-8",
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -21,18 +21,22 @@ sites = ['https://www.youtube.com/', 'https://instagram.com', 'https://wikipedia
          'https://www.ozon.ru']
 
 for site in sites:
+
     try:
+        response = rq.get(site, timeout=3)
         if response.status_code == 200:
-           logging.info(f'{site}, response - {response}')
-           success_responses.write(f'{site}\n')
+            #logging.info(f'{site}, response - {response}')
+            success_responses.write(f'INFO: {site}, response ({response.status_code})\n')
+            print(f'INFO: Сайт {site} доступен, response - 200 ')
         else:
-           logging.warning(f'{site}, response - {response}')
-           bad_responses.write(f'{site}\n')
-    except:
-        logging.error(f'{site}, response - {response}')
-        blocked_responses.write(f'{site}\n')
-    response = rq.get(site, timeout=3)
-    print(response)
+            if response.status_code != 200:
+                #logging.warning(f'{site}, response - {response}')
+                bad_responses.write(f'WARNING: {site}, response ({response.status_code})\n')
+                print(f'WARNING: Сайт {site} не доступен, response - {response}')
+    except(rq.exceptions.ConnectionError, rq.exceptions.Timeout):
+        #logging.error(f'ERROR: Сайт {site} не доступен, NO CONNECTION')
+        blocked_responses.write(f'ERROR: {site}, response ({response.status_code})\n')
+        print(f'ERROR: Сайт {site} не доступен, response - {response}')
 
 success_responses.close()
 bad_responses.close()
